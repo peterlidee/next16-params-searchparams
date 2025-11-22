@@ -2,13 +2,6 @@ import ListControles from '@/components/ListControles';
 import { validateSortOrder } from '@/lib/validateSortOrder';
 import Link from 'next/link';
 
-// PageProps (dunno)
-
-export type CustomPageProps = {
-  params: Promise<{ listSlug: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
-
 const data: Record<string, string[]> = {
   fruit: ['apple', 'banana', 'cherry'],
   names: ['Adam', 'Bob', 'Cole'],
@@ -22,7 +15,7 @@ const sortCallbacks = {
 export default async function ListPage({
   params,
   searchParams,
-}: CustomPageProps) {
+}: PageProps<'/list/[listSlug]'>) {
   const { listSlug } = await params;
   if (!(listSlug in data)) {
     return <p>Invalid param.</p>;
