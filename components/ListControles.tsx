@@ -19,9 +19,9 @@ export default function ListControles({ sortOrder }: Props) {
   const params = useParams();
 
   function handleSort(newSortOrder: SortOrderT) {
-    const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set('sortOrder', newSortOrder);
-    router.push(`${pathName}?${newParams.toString()}`);
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+    newSearchParams.set('sortOrder', newSortOrder);
+    router.push(`${pathName}?${newSearchParams.toString()}`);
   }
   return (
     <>
