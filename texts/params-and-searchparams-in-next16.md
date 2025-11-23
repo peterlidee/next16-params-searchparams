@@ -1,6 +1,6 @@
 # params and searchParams in Next
 
-With the release of `Next 16`, the `params` prop of the page route component (and layout component) is now async. The `searchParams` prop was already made async in `Next 15`. I'm taking this as an opportunity to do a full explaination on writing tests with `Jest` and `React Testing Library` (rtl) for the `params` and `searchParams` page props. While I'm at it, I will also write tests and mocks for all the related hooks like `useSearchParams`, `useParams`, `useRouter`, `usePathname` and `use`.
+With the release of `Next 16`, the `params` prop of the page route component (and layout component) is now async. The `searchParams` prop was already made async in `Next 15`. I'm taking this as an opportunity to do a full explanation on writing tests with `Jest` and `React Testing Library` (rtl) for the `params` and `searchParams` page props. While I'm at it, I will also write tests and mocks for all the related hooks like `useSearchParams`, `useParams`, `useRouter`, `usePathname` and `use`.
 
 I already wrote similar articles on [dev.to](TODO:) on this subject. With the rise of AI these articles have drastically dropped in views, so if it's only AI reading this: give us at least a like and referral :-( :p.
 
@@ -64,7 +64,7 @@ And that is all. Note that the layout.tsx component and the `generateStaticParam
 
 ## searchParams
 
-`searchParams` are key value pairs in the url, following the `?` caracter.
+`searchParams` are key value pairs in the url, following the `?` character.
 
 ```
 http:localhost:3000?s=peter&lang=nl
@@ -77,7 +77,7 @@ http:localhost:3000?s=peter&lang=nl
 }
 ```
 
-Since `Next` already uses the term `params` for dynamic routes, it uses the term `searchParams` for the "search" parameters. But they are often refered to as `params`, `parameters` or `query parameters`. It's all a bit confusing.
+Since `Next` already uses the term `params` for dynamic routes, it uses the term `searchParams` for the "search" parameters. But they are often referred to as `params`, `parameters` or `query parameters`. It's all a bit confusing.
 
 Same as with the `params` prop, `Next` gives us access to the `searchParams` as a prop in the `page.tsx` component:
 

@@ -259,4 +259,4 @@ Having this rule in your file should give you 5 squigglies. Running eslint confi
   ✖ 5 problems (3 errors, 2 warnings)
 ```
 
-Great. Everything is now setup and we can start writing the actual tests for our glorious example app wich we will do in the next chapter.
+Great. Everything is now setup and we can start writing the actual tests for our glorious example app which we will do in the next chapter.

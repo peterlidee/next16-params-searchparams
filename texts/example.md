@@ -115,7 +115,7 @@ const sortCallbacks = {
 </ul>;
 ```
 
-(We put the callbacks in a seperate object to make it a bit more clean.)
+(We put the callbacks in a separate object to make it a bit more clean.)
 
 ## `<SortControles />` component
 
@@ -129,9 +129,9 @@ router.push('/list/fruit?sortOrder=desc');
 
 We could more or less hardcode this route but that would cause a small problem. If more `searchParams` were present, they would be deleted. So if we're on this route: `http:localhost:3000/list/fruit?sortOrder=asc&foo=bar` and we push the above route, we would lose the `searchParam` `foo=bar`.
 
-## useSeachParams
+## useSearchParams
 
-To solve this, we first use the `useSeachParams` hook that returns a readonly `URLSearchParams` interface: `ReadonlyURLSearchParams`.
+To solve this, we first use the `useSearchParams` hook that returns a readonly `URLSearchParams` interface: `ReadonlyURLSearchParams`.
 
 > The URLSearchParams interface defines utility methods to work with the query string of a URL.
 >
