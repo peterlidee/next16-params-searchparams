@@ -117,9 +117,9 @@ const sortCallbacks = {
 
 (We put the callbacks in a separate object to make it a bit more clean.)
 
-## `<SortControls />` component
+## `<ListControls />` component
 
-The only thing missing now are the buttons. Since they are buttons we need to put them inside a client component `<SortControls />`.
+The only thing missing now are the buttons. Since they are buttons we need to put them inside a client component `<ListControls />`.
 
 We are going to use the buttons to push a new route to the router. So on clicking the button 'descending' we want to do this:
 
