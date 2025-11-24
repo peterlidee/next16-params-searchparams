@@ -1,8 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import ListPage from '../page';
-import ListControles from '@/components/ListControles';
+import ListControls from '@/components/ListControls';
+import { validateSortOrder } from '@/lib/validateSortOrder';
 
-jest.mock('@/components/ListControles');
+jest.mock('@/components/ListControls');
+jest.mock('@/lib/validateSortOrder');
 
 async function generateAsyncValue<T>(value: T) {
   return value;
@@ -10,6 +12,7 @@ async function generateAsyncValue<T>(value: T) {
 
 describe('listSlug page component', () => {
   test('It renders', async () => {
+    (validateSortOrder as jest.Mock).mockReturnValue('asc');
     const component = await ListPage({
       params: generateAsyncValue({ listSlug: 'fruit' }),
       searchParams: generateAsyncValue({}),
@@ -20,11 +23,24 @@ describe('listSlug page component', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
       'List of fruit'
     );
-    expect(ListControles).toHaveBeenCalledTimes(1);
+    expect(ListControls).toHaveBeenCalledTimes(1);
     expect(screen.getByRole('list')).toBeInTheDocument();
   });
 
-  test('It displays "Invalid param" when the params in not in the data object', async () => {
+  test('It correctly calls the validateSortOrder mock', async () => {
+    (validateSortOrder as jest.Mock).mockReturnValue('asc');
+    const component = await ListPage({
+      params: generateAsyncValue({ listSlug: 'fruit' }),
+      searchParams: generateAsyncValue({ foo: 'bar' }),
+    });
+    render(component);
+
+    expect(validateSortOrder).toHaveBeenCalledTimes(1);
+    expect(validateSortOrder).toHaveBeenCalledWith({ foo: 'bar' });
+  });
+
+  test('It correctly handles invalid params', async () => {
+    (validateSortOrder as jest.Mock).mockReturnValue('asc');
     const component = await ListPage({
       params: generateAsyncValue({ listSlug: 'foobar' }),
       searchParams: generateAsyncValue({}),
@@ -34,11 +50,12 @@ describe('listSlug page component', () => {
     // none of the other elements are present
     expect(screen.queryByRole('heading', { level: 1 })).not.toBeInTheDocument();
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
-    expect(ListControles).toHaveBeenCalledTimes(0);
+    expect(ListControls).toHaveBeenCalledTimes(0);
     expect(screen.queryByRole('list')).not.toBeInTheDocument();
   });
 
-  test('It renders the list asc when no searchParam sortOrder is present', async () => {
+  test('It renders the list asc when validateSortOrder mock returns "asc"', async () => {
+    (validateSortOrder as jest.Mock).mockReturnValue('asc');
     const component = await ListPage({
       params: generateAsyncValue({ listSlug: 'fruit' }),
       searchParams: generateAsyncValue({}),
@@ -51,55 +68,17 @@ describe('listSlug page component', () => {
     expect(listItems[2]).toHaveTextContent(/cherry/i);
   });
 
-  test('It renders the list asc when searchParam sortOrder is asc', async () => {
+  test('It renders the list desc when validateSortOrder mock returns "desc"', async () => {
+    (validateSortOrder as jest.Mock).mockReturnValue('desc');
     const component = await ListPage({
       params: generateAsyncValue({ listSlug: 'fruit' }),
-      searchParams: generateAsyncValue({ sortOrder: 'asc' }),
+      searchParams: generateAsyncValue({}),
     });
     render(component);
 
     const listItems = screen.getAllByRole('listitem');
-    expect(listItems[0]).toHaveTextContent(/apple/i);
-    expect(listItems[1]).toHaveTextContent(/banana/i);
-    expect(listItems[2]).toHaveTextContent(/cherry/i);
-  });
-
-  test('It renders the list asc when searchParam sortOrder is empty', async () => {
-    const component = await ListPage({
-      params: generateAsyncValue({ listSlug: 'fruit' }),
-      searchParams: generateAsyncValue({ sortOrder: '' }),
-    });
-    render(component);
-
-    const listItems = screen.getAllByRole('listitem');
-    expect(listItems[0]).toHaveTextContent(/apple/i);
-    expect(listItems[1]).toHaveTextContent(/banana/i);
-    expect(listItems[2]).toHaveTextContent(/cherry/i);
-  });
-
-  test('It renders the list asc when searchParam sortOrder is multiple values', async () => {
-    const component = await ListPage({
-      params: generateAsyncValue({ listSlug: 'fruit' }),
-      searchParams: generateAsyncValue({ sortOrder: ['foo', 'bar'] }),
-    });
-    render(component);
-
-    const listItems = screen.getAllByRole('listitem');
-    expect(listItems[0]).toHaveTextContent(/apple/i);
-    expect(listItems[1]).toHaveTextContent(/banana/i);
-    expect(listItems[2]).toHaveTextContent(/cherry/i);
-  });
-
-  test('It renders the list desc when searchParam sortOrder is desc', async () => {
-    const component = await ListPage({
-      params: generateAsyncValue({ listSlug: 'fruit' }),
-      searchParams: generateAsyncValue({ sortOrder: 'desc' }),
-    });
-    render(component);
-
-    const listItems = screen.getAllByRole('listitem');
-    expect(listItems[2]).toHaveTextContent(/apple/i);
-    expect(listItems[1]).toHaveTextContent(/banana/i);
     expect(listItems[0]).toHaveTextContent(/cherry/i);
+    expect(listItems[1]).toHaveTextContent(/banana/i);
+    expect(listItems[2]).toHaveTextContent(/apple/i);
   });
 });
