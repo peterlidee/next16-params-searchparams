@@ -1,4 +1,4 @@
-import ListControles from '@/components/ListControles';
+import ListControls from '@/components/ListControls';
 import { validateSortOrder } from '@/lib/validateSortOrder';
 import Link from 'next/link';
 
@@ -29,7 +29,7 @@ export default async function ListPage({
         home
       </Link>
       <h1 className='font-bold text-xl mb-2'>List of {listSlug}</h1>
-      <ListControles sortOrder={sortOrder} />
+      <ListControls />
       <ul>
         {data[listSlug].sort(sortCallbacks[sortOrder]).map((item) => (
           <li key={item} className='list-disc ml-3'>

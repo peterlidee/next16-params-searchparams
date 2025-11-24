@@ -1,6 +1,6 @@
 'use client';
 
-import { SortOrderT } from '@/lib/validateSortOrder';
+import { SortOrderT, validateSortOrder } from '@/lib/validateSortOrder';
 import {
   useParams,
   usePathname,
@@ -8,11 +8,7 @@ import {
   useSearchParams,
 } from 'next/navigation';
 
-type Props = {
-  sortOrder: SortOrderT;
-};
-
-export default function ListControles({ sortOrder }: Props) {
+export default function ListControls() {
   const searchParams = useSearchParams();
   const pathName = usePathname();
   const router = useRouter();
@@ -23,6 +19,14 @@ export default function ListControles({ sortOrder }: Props) {
     newSearchParams.set('sortOrder', newSortOrder);
     router.push(`${pathName}?${newSearchParams.toString()}`);
   }
+
+  // get sortOrder from searchParams
+  const rawSortOrder = searchParams.get('sortOrder'); // string | null
+  // validateSortOrder expects: {[key: string]: string | string[] | undefined}
+  const sortOrder = validateSortOrder(
+    rawSortOrder ? { sortOrder: rawSortOrder } : {}
+  );
+
   return (
     <>
       <h2 className='font-semibold mb-1'>Sort {params.listSlug}</h2>
