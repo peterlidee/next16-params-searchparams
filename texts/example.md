@@ -1,6 +1,6 @@
 # An example of using params and searchParams in Next 16
 
-Our goal is to write tests and mocks for `params`, `searchParams` and some other hooks. Therefore we need something to test. That is what we will be doing in this chapter. Here is what we will build:
+Our goal is to write tests and mocks for `params`, `searchParams` and some hooks. Therefore we need something to test. That is what we will be doing in this chapter. Here is what we will build:
 
 [insert example.png]
 
@@ -72,7 +72,7 @@ const searchParamsResolved = await searchParams;
 const sortOrder = validateSortOrder(searchParamsResolved);
 ```
 
-`validateSortorder` is a little helper function I wrote because we have to take all cases into account:
+`validateSortOrder` is a little helper function I wrote because we have to take all cases into account:
 
 - no sortOrder param `http:localhost:3000/list/fruit`
 - invalid sortOrder param `http:localhost:3000/list/fruit?sortOrder=foobar`
@@ -117,9 +117,9 @@ const sortCallbacks = {
 
 (We put the callbacks in a separate object to make it a bit more clean.)
 
-## `<SortControles />` component
+## `<SortControls />` component
 
-The only thing missing now are the buttons. Since they are buttons we need to put them inside a client component `<SortControles />`.
+The only thing missing now are the buttons. Since they are buttons we need to put them inside a client component `<SortControls />`.
 
 We are going to use the buttons to push a new route to the router. So on clicking the button 'descending' we want to do this:
 
@@ -177,14 +177,36 @@ function handleSort(newSortOrder: SortOrderT) {
 
 Let me quickly recap this. We do not want to overwrite unrelated search parameters. So we first retrieve all `searchParams` and then just overwrite `sortOrder`. The method of doing this is a bit complex with the `ReadonlyURLSearchParams` that needs to be converted. Lastly, we construct a new url and push it to router.
 
-Here is our full `<ListControles />` component. Apart from the code just above it's just a title and 2 buttons.
+## validateSortOrder (again)
+
+There is a second use for `useSearchParams`. We need the current `sortOrder` value to highlight to currently active button. This means we have to reuse the `validateSortOrder` helper function we used in `page.tsx`.
+
+But there is a small issue here. `validateSortOrder` takes the `searchParams` page prop object and then returns `'asc' | 'desc'`. But we don't get that object here. To get around that I used this:
 
 ```tsx
-// components/ListControles.tsx
+const searchParams = useSearchParams();
+
+// ...
+
+// get sortOrder from useSearchParams()
+const rawSortOrder = searchParams.get('sortOrder'); // string | null
+// validateSortOrder expects: {[key: string]: string | string[] | undefined}
+// validateSortOrder returns 'asc' | 'desc'
+const sortOrder = validateSortOrder(
+  rawSortOrder ? { sortOrder: rawSortOrder } : {}
+);
+```
+
+This will call `validateSortOrder` either with an empty object or with `{ sortOrder: string }` and `validateSortOrder` handles this just fine.
+
+Here is our full `<ListControls />` component. Apart from the code just above it's just a title and 2 buttons.
+
+```tsx
+// components/ListControls.tsx
 
 'use client';
 
-import { SortOrderT } from '@/lib/validateSortOrder';
+import { SortOrderT, validateSortOrder } from '@/lib/validateSortOrder';
 import {
   useParams,
   usePathname,
@@ -192,21 +214,23 @@ import {
   useSearchParams,
 } from 'next/navigation';
 
-type Props = {
-  sortOrder: SortOrderT;
-};
-
-export default function ListControles({ sortOrder }: Props) {
+export default function ListControls() {
   const searchParams = useSearchParams();
   const pathName = usePathname();
   const router = useRouter();
   const params = useParams();
 
   function handleSort(newSortOrder: SortOrderT) {
-    const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set('sortOrder', newSortOrder);
-    router.push(`${pathName}?${newParams.toString()}`);
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+    newSearchParams.set('sortOrder', newSortOrder);
+    router.push(`${pathName}?${newSearchParams.toString()}`);
   }
+
+  const rawSortOrder = searchParams.get('sortOrder');
+  const sortOrder = validateSortOrder(
+    rawSortOrder ? { sortOrder: rawSortOrder } : {}
+  );
+
   return (
     <>
       <h2 className='font-semibold mb-1'>Sort {params.listSlug}</h2>
@@ -233,13 +257,13 @@ export default function ListControles({ sortOrder }: Props) {
 }
 ```
 
-Quick sidenote: notice that we could've simply passed `params` and `searchParams` from `page.tsx` to `<ListControles />`. But, in a real world scenario that would include a lot of prop drilling and this also gives us a chance to use and later test and mock `useParams` (we used it in the h2 title) and `useSearchParams`.
+Quick side note: notice that we could've simply passed `params` and `searchParams` from `page.tsx` to `<ListControls />`. But, in a real world scenario that would include a lot of prop drilling and this also gives us a chance to use and later test and mock `useParams` (we used it in the h2 title) and `useSearchParams`.
 
 Here is our final `page.tsx` component:
 
 ```tsx
 // app/list/[listSlug]/page.tsx
-import ListControles from '@/components/ListControles';
+import ListControls from '@/components/ListControls';
 import { validateSortOrder } from '@/lib/validateSortOrder';
 import Link from 'next/link';
 
@@ -270,7 +294,7 @@ export default async function ListPage({
         home
       </Link>
       <h1 className='font-bold text-xl mb-2'>List of {listSlug}</h1>
-      <ListControles sortOrder={sortOrder} />
+      <ListControls />
       <ul>
         {data[listSlug].sort(sortCallbacks[sortOrder]).map((item) => (
           <li key={item} className='list-disc ml-3'>
