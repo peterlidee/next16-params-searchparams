@@ -6,9 +6,85 @@ Our example looks like this
 
 [insert example.png]
 
-And consists of a `page.tsx` component, a client component `<ListControles />` for the buttons and a helper function `validateSortOrder` to validate the `searchParams`.
+And consists of a `page.tsx` component, a client component `<ListControls />` for the buttons and a helper function `validateSortOrder` to validate the `searchParams`.
 
-We start of with the page component:
+## validateSortOrder
+
+Let's do this function first. This isn't relevant on this topic but the tests run different scenario's for our `searchParams` like: `{}`, `{ sortOrder: '' }`, `{ sortOrder: 'asc' }`,... So, we handled this and no longer need to test it.
+
+Here is the function:
+
+```tsx
+export type SortOrderT = 'asc' | 'desc';
+
+export function validateSortOrder(
+  searchParams: Awaited<PageProps<'/list/[listSlug]'>['searchParams']>
+): SortOrderT {
+  if ('sortOrder' in searchParams && searchParams.sortOrder === 'desc')
+    return 'desc';
+  return 'asc';
+}
+```
+
+and these are the tests:
+
+```tsx
+// claude wrote this
+// all pass
+
+import { validateSortOrder } from '../validateSortOrder';
+
+describe('function validateSortOrder', () => {
+  it('should return "asc" when sortOrder is not present in searchParams', () => {
+    const searchParams = {};
+    const result = validateSortOrder(searchParams);
+    expect(result).toBe('asc');
+  });
+
+  it('should return "desc" when sortOrder is "desc"', () => {
+    const searchParams = { sortOrder: 'desc' };
+    const result = validateSortOrder(searchParams);
+    expect(result).toBe('desc');
+  });
+
+  it('should return "asc" when sortOrder is "asc"', () => {
+    const searchParams = { sortOrder: 'asc' };
+    const result = validateSortOrder(searchParams);
+    expect(result).toBe('asc');
+  });
+
+  it('should return "asc" when sortOrder has invalid value', () => {
+    const searchParams = { sortOrder: 'invalid' };
+    const result = validateSortOrder(searchParams);
+    expect(result).toBe('asc');
+  });
+
+  it('should return "asc" when sortOrder is empty string', () => {
+    const searchParams = { sortOrder: '' };
+    const result = validateSortOrder(searchParams);
+    expect(result).toBe('asc');
+  });
+
+  it('should return "asc" when sortOrder is undefined', () => {
+    const searchParams = { sortOrder: undefined };
+    const result = validateSortOrder(searchParams);
+    expect(result).toBe('asc');
+  });
+
+  it('should ignore other properties in searchParams', () => {
+    const searchParams = {
+      sortOrder: 'desc',
+      otherParam: 'value',
+    };
+    const result = validateSortOrder(searchParams);
+    expect(result).toBe('desc');
+  });
+});
+```
+
+## page.tsx
+
+Next, the page component:
 
 ```tsx
 // list/[listSlug]/page.tsx
@@ -30,7 +106,7 @@ export default async function ListPage({
         home
       </Link>
       <h1 className='font-bold text-xl mb-2'>List of {listSlug}</h1>
-      <ListControles sortOrder={sortOrder} />
+      <ListControls />
       <ul>
         {data[listSlug].sort(sortCallbacks[sortOrder]).map((item) => (
           <li key={item} className='list-disc ml-3'>
@@ -137,9 +213,11 @@ And we're good. We can now test async components and async parameters. Great, le
 
 import { render, screen } from '@testing-library/react';
 import ListPage from '../page';
-import ListControles from '@/components/ListControles';
+import ListControls from '@/components/ListControls';
+import { validateSortOrder } from '@/lib/validateSortOrder';
 
-jest.mock('@/components/ListControles');
+jest.mock('@/components/ListControls');
+jest.mock('@/lib/validateSortOrder');
 
 async function generateAsyncValue<T>(value: T) {
   return value;
@@ -166,41 +244,69 @@ const component = await ListPage({
 render(component);
 ```
 
-Note that we mocked `<ListControles />` because that uses a lot of hooks like `useSearchParams`. Unmocked, this would crash the test. Also note that we will not mock `validateSortOrder` because we want to keep this test as simple as possible. In a real world test we would.
+Also note that we mocked `<ListControls />` and `validateSortOrder`. We mocked `<ListControls />` because it uses a lot of hooks like `useSearchParams`. Unmocked, this would crash the test. Mocking `validateSortOrder` has 2 important consequences.
 
-Let's finish up this 'it renders' test. It has a link, a heading (already tested), a mocked component and a list of components. We write some more assertions.
+Firstly, it will break the component. By mocking we removed the return value from the function and the `page.tsx` component expects this return value to be either `asc` or `desc`, not `undefined`. To fix this, we will need to return a value ('asc' or 'desc') from the `validateSortOrder` mock:
 
 ```tsx
-// all pass
-expect(screen.getByRole('link')).toHaveTextContent(/home/i);
-expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-  'List of fruit'
-);
-expect(ListControles).toHaveBeenCalledTimes(1);
-expect(screen.getByRole('list')).toBeInTheDocument();
+(validateSortOrder as jest.Mock).mockReturnValue('asc');
 ```
 
-Finally, we can write some more tests to check the `searchParam` sortOrder. We check different scenarios:
+The second consequence it that the async `searchParam` value that we pass into `ListPage` component becomes irrelevant. As long as it is an object, everything is fine. But since we mocked `validateSortOrder` and it's return value, there is no longer a link between what we pass into it (`searchParams`) and what it returns (`.mockReturnValue('asc')`). This is how it's supposed to be in unit tests.
 
-```
-// searchParams
-{}
-{ sortOrder: '' }
-{ sortOrder: 'asc' }
-{ sortOrder: 'desc' }
-{ sortOrder: ['foo', 'bar'] }
+## It renders
+
+Let's fill in the "it renders" test now. We haven't written any assertions:
+
+```tsx
+// pass
+test('It renders', async () => {
+  (validateSortOrder as jest.Mock).mockReturnValue('asc');
+  const component = await ListPage({
+    params: generateAsyncValue({ listSlug: 'fruit' }),
+    searchParams: generateAsyncValue({}),
+  });
+  render(component);
+
+  expect(screen.getByRole('link')).toHaveTextContent(/home/i);
+  expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+    'List of fruit'
+  );
+  expect(ListControls).toHaveBeenCalledTimes(1);
+  expect(screen.getByRole('list')).toBeInTheDocument();
+});
 ```
 
-I am just going to display the entire test file below. it should be clear. All tests pass.
+We will also test our `validateSortOrder` mock:
+
+```tsx
+// pass
+test('It correctly calls the validateSortOrder mock', async () => {
+  (validateSortOrder as jest.Mock).mockReturnValue('asc');
+  const component = await ListPage({
+    params: generateAsyncValue({ listSlug: 'fruit' }),
+    searchParams: generateAsyncValue({ foo: 'bar' }),
+  });
+  render(component);
+
+  expect(validateSortOrder).toHaveBeenCalledTimes(1);
+  expect(validateSortOrder).toHaveBeenCalledWith({ foo: 'bar' });
+});
+```
+
+## Last tests
+
+Remember from earlier, when writing a test for `validateSortOrder`, we tested for different `searchParams`. Since we now mocked this function the only tests that are left are the ones where this mock returns "asc" or "desc". Finally we also wrote a little test for an invalid `params`. Here is our full test file, all tests pass.
 
 ```tsx
 // app/list/[listSlug]/page.tsx
-
 import { render, screen } from '@testing-library/react';
 import ListPage from '../page';
-import ListControles from '@/components/ListControles';
+import ListControls from '@/components/ListControls';
+import { validateSortOrder } from '@/lib/validateSortOrder';
 
-jest.mock('@/components/ListControles');
+jest.mock('@/components/ListControls');
+jest.mock('@/lib/validateSortOrder');
 
 async function generateAsyncValue<T>(value: T) {
   return value;
@@ -208,6 +314,7 @@ async function generateAsyncValue<T>(value: T) {
 
 describe('listSlug page component', () => {
   test('It renders', async () => {
+    (validateSortOrder as jest.Mock).mockReturnValue('asc');
     const component = await ListPage({
       params: generateAsyncValue({ listSlug: 'fruit' }),
       searchParams: generateAsyncValue({}),
@@ -218,11 +325,24 @@ describe('listSlug page component', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
       'List of fruit'
     );
-    expect(ListControles).toHaveBeenCalledTimes(1);
+    expect(ListControls).toHaveBeenCalledTimes(1);
     expect(screen.getByRole('list')).toBeInTheDocument();
   });
 
-  test('It displays "Invalid param" when the params in not in the data object', async () => {
+  test('It correctly calls the validateSortOrder mock', async () => {
+    (validateSortOrder as jest.Mock).mockReturnValue('asc');
+    const component = await ListPage({
+      params: generateAsyncValue({ listSlug: 'fruit' }),
+      searchParams: generateAsyncValue({ foo: 'bar' }),
+    });
+    render(component);
+
+    expect(validateSortOrder).toHaveBeenCalledTimes(1);
+    expect(validateSortOrder).toHaveBeenCalledWith({ foo: 'bar' });
+  });
+
+  test('It correctly handles invalid params', async () => {
+    (validateSortOrder as jest.Mock).mockReturnValue('asc');
     const component = await ListPage({
       params: generateAsyncValue({ listSlug: 'foobar' }),
       searchParams: generateAsyncValue({}),
@@ -232,11 +352,12 @@ describe('listSlug page component', () => {
     // none of the other elements are present
     expect(screen.queryByRole('heading', { level: 1 })).not.toBeInTheDocument();
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
-    expect(ListControles).toHaveBeenCalledTimes(0);
+    expect(ListControls).toHaveBeenCalledTimes(0);
     expect(screen.queryByRole('list')).not.toBeInTheDocument();
   });
 
-  test('It renders the list asc when no searchParam sortOrder is present', async () => {
+  test('It renders the list asc when validateSortOrder mock returns "asc"', async () => {
+    (validateSortOrder as jest.Mock).mockReturnValue('asc');
     const component = await ListPage({
       params: generateAsyncValue({ listSlug: 'fruit' }),
       searchParams: generateAsyncValue({}),
@@ -249,58 +370,20 @@ describe('listSlug page component', () => {
     expect(listItems[2]).toHaveTextContent(/cherry/i);
   });
 
-  test('It renders the list asc when searchParam sortOrder is asc', async () => {
+  test('It renders the list desc when validateSortOrder mock returns "desc"', async () => {
+    (validateSortOrder as jest.Mock).mockReturnValue('desc');
     const component = await ListPage({
       params: generateAsyncValue({ listSlug: 'fruit' }),
-      searchParams: generateAsyncValue({ sortOrder: 'asc' }),
+      searchParams: generateAsyncValue({}),
     });
     render(component);
 
     const listItems = screen.getAllByRole('listitem');
-    expect(listItems[0]).toHaveTextContent(/apple/i);
-    expect(listItems[1]).toHaveTextContent(/banana/i);
-    expect(listItems[2]).toHaveTextContent(/cherry/i);
-  });
-
-  test('It renders the list asc when searchParam sortOrder is empty', async () => {
-    const component = await ListPage({
-      params: generateAsyncValue({ listSlug: 'fruit' }),
-      searchParams: generateAsyncValue({ sortOrder: '' }),
-    });
-    render(component);
-
-    const listItems = screen.getAllByRole('listitem');
-    expect(listItems[0]).toHaveTextContent(/apple/i);
-    expect(listItems[1]).toHaveTextContent(/banana/i);
-    expect(listItems[2]).toHaveTextContent(/cherry/i);
-  });
-
-  test('It renders the list asc when searchParam sortOrder is multiple values', async () => {
-    const component = await ListPage({
-      params: generateAsyncValue({ listSlug: 'fruit' }),
-      searchParams: generateAsyncValue({ sortOrder: ['foo', 'bar'] }),
-    });
-    render(component);
-
-    const listItems = screen.getAllByRole('listitem');
-    expect(listItems[0]).toHaveTextContent(/apple/i);
-    expect(listItems[1]).toHaveTextContent(/banana/i);
-    expect(listItems[2]).toHaveTextContent(/cherry/i);
-  });
-
-  test('It renders the list desc when searchParam sortOrder is desc', async () => {
-    const component = await ListPage({
-      params: generateAsyncValue({ listSlug: 'fruit' }),
-      searchParams: generateAsyncValue({ sortOrder: 'desc' }),
-    });
-    render(component);
-
-    const listItems = screen.getAllByRole('listitem');
-    expect(listItems[2]).toHaveTextContent(/apple/i);
-    expect(listItems[1]).toHaveTextContent(/banana/i);
     expect(listItems[0]).toHaveTextContent(/cherry/i);
+    expect(listItems[1]).toHaveTextContent(/banana/i);
+    expect(listItems[2]).toHaveTextContent(/apple/i);
   });
 });
 ```
 
-And that is a full test for `page.tsx` (except `validateSortOrder`). In the next chapter, we will write a test for our final component `<ListControles />`.
+And that is a full test for `page.tsx`. In the next chapter, we will write a test for our final component `<ListControls />`.
