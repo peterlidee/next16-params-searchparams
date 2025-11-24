@@ -20,9 +20,7 @@ export default function ListControls() {
     router.push(`${pathName}?${newSearchParams.toString()}`);
   }
 
-  // get sortOrder from searchParams
-  const rawSortOrder = searchParams.get('sortOrder'); // string | null
-  // validateSortOrder expects: {[key: string]: string | string[] | undefined}
+  const rawSortOrder = searchParams.get('sortOrder');
   const sortOrder = validateSortOrder(
     rawSortOrder ? { sortOrder: rawSortOrder } : {}
   );
