@@ -304,5 +304,3 @@ describe('listSlug page component', () => {
 ```
 
 And that is a full test for `page.tsx` (except `validateSortOrder`). In the next chapter, we will write a test for our final component `<ListControles />`.
-
-// TODO: spellcheck, todos, paypall link
