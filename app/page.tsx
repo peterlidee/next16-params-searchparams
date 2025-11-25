@@ -14,8 +14,11 @@ export default function Home() {
         </Link>
       </li>
       <li>
-        <Link href='/list2/fruit' className='text-blue-400 underline'>
-          /list2/fruit (route page is client component)
+        <Link
+          href='/list2/fruit?sortOrder=asc'
+          className='text-blue-400 underline'
+        >
+          /list2/fruit?sortOrder=asc (route page is client component)
         </Link>
       </li>
     </ul>
