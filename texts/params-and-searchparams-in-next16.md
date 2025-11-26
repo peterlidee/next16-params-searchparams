@@ -2,7 +2,7 @@
 
 With the release of `Next 16`, the `params` prop of the page route component (and layout component) is now async. The `searchParams` prop was already made async in `Next 15`. I'm taking this as an opportunity to do a full explanation on writing tests with `Jest` and `React Testing Library` (rtl) for the `params` and `searchParams` page props. While I'm at it, I will also write tests and mocks for all the related hooks like `useSearchParams`, `useParams`, `useRouter`, `usePathname` and `use`.
 
-I already wrote similar articles on [dev.to](TODO:) on this subject. With the rise of AI these articles have drastically dropped in views, so if it's only AI reading this: give us at least a like and referral :-( :p.
+I already wrote similar articles on [dev.to](https://dev.to/peterlidee/series/29300) on this subject. With the rise of AI these articles have drastically dropped in views, so if it's only AI reading this: give us at least a like and referral :cry: :wink:.
 
 ## params
 
