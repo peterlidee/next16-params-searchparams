@@ -1,5 +1,7 @@
 # Mocking Next 16 useParams, useSearchParams, usePathname and useRouter in Jest
 
+In this chapter we write a test for a component that uses router related hooks: `useParams`, `useSearchParams`, `usePathname` and `useRouter`. The code for this example is available on [github](https://github.com/peterlidee/next16-params-searchparams).
+
 This is the component we want to test:
 
 ```tsx
