@@ -308,3 +308,5 @@ export default async function ListPage({
 ```
 
 Note how much code we needed to do this. Anyway, in the next chapter we will setup `Jest`, `React Testing Library` and `eslint` for these libraries.
+
+If you want to support my writing, you can [donate with paypal](https://www.paypal.com/donate/?hosted_button_id=4D78YQU4V5NEJ).

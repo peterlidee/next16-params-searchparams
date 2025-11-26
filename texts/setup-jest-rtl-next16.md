@@ -260,3 +260,5 @@ Having this rule in your file should give you 5 squigglies. Running eslint confi
 ```
 
 Great. Everything is now setup and we can start writing the actual tests for our glorious example app which we will do in the next chapter.
+
+If you want to support my writing, you can [donate with paypal](https://www.paypal.com/donate/?hosted_button_id=4D78YQU4V5NEJ).

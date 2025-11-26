@@ -387,3 +387,5 @@ describe('listSlug page component', () => {
 ```
 
 And that is a full test for `page.tsx`. In the next chapter, we will write a test for our final component `<ListControls />`.
+
+If you want to support my writing, you can [donate with paypal](https://www.paypal.com/donate/?hosted_button_id=4D78YQU4V5NEJ).

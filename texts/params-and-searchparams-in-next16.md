@@ -155,3 +155,5 @@ This means you get type safety on routes. So, yeah, we'll be using `PageProps`.
 ## Next parts
 
 Now that we know how to use `params` and `searchParams` in `Next 16`, we will setup an example in the next chapter and then start mocking and testing it in the following chapters.
+
+If you want to support my writing, you can [donate with paypal](https://www.paypal.com/donate/?hosted_button_id=4D78YQU4V5NEJ).
