@@ -1,4 +1,4 @@
-# params and searchParams in Next
+# async params and searchParams in Next 16
 
 With the release of `Next 16`, the `params` prop of the page route component (and layout component) is now async. The `searchParams` prop was already made async in `Next 15`. I'm taking this as an opportunity to do a full explanation on writing tests with `Jest` and `React Testing Library` (rtl) for the `params` and `searchParams` page props. While I'm at it, I will also write tests and mocks for all the related hooks like `useSearchParams`, `useParams`, `useRouter`, `usePathname` and `use`.
 
@@ -144,7 +144,7 @@ You enter the relative route path in the `PageProps` utility type and it just in
 (parameter) searchParams: Promise<Record<string, string | string[] | undefined>>
 ```
 
-Which is correct and quit nifty, I like it. Also note that entering an incorrect path will make `TypeScript` yell at you:
+Which is correct and quite nifty, I like it. Also note that entering an incorrect path will make `TypeScript` yell at you:
 
 ```ts
 Type '"/users/[foobar]"' does not satisfy the constraint 'AppRoutes'.
