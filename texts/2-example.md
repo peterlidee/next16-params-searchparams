@@ -1,4 +1,4 @@
-# An example of using params and searchParams in Next 16
+# An example of using async params and async searchParams in Next 16
 
 Our goal is to write tests and mocks for `params`, `searchParams` and some hooks. Therefore we need something to test. That is what we will be doing in this chapter. Here is what we will build:
 
