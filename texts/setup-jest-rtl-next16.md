@@ -2,6 +2,8 @@
 
 Before we start with writing tests and mocks we first need to setup Jest and React Testing library. This is actually quite easy but there are some little problems we need to solve and some optimizations we can make. Therefore we will devote an entire chapter on this.
 
+The code for this example is available on [github](https://github.com/peterlidee/next16-params-searchparams).
+
 ## Next instruction
 
 For our first step we will just follow the [instructions](https://nextjs.org/docs/app/guides/testing/jest#manual-setup) `Next` provides. Note, this is the `TypeScript` setup.
