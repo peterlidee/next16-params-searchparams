@@ -1,6 +1,6 @@
 # Mocking async params and searchParams in Next 16 using Jest and React Testing Library
 
-In the previous chapters we looked at how `params` and `searchParams` work in `Next 16`. We then went over an example that we will be testing and finally setup `Jest`. We're now all ready to start writing some actual tests.
+In the previous chapters we looked at how `params` and `searchParams` work in `Next 16`. We then went over an example that we will be testing and finally setup `Jest`. We're now all ready to start writing some actual tests. The code for this example is available on [github](https://github.com/peterlidee/next16-params-searchparams).
 
 Our example looks like this
 
